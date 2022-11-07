@@ -32,3 +32,14 @@ module "vm" {
   vm_admin_password   = var.vm_admin_password
   source_image_id     = data.azurerm_image.win2022_ja.id
 }
+
+module "loadbalancer" {
+  source = "./modules/loadbalancer"
+
+  count                = local.create_count
+  prefix               = var.prefix
+  env                  = var.env
+  resource_group_name  = azurerm_resource_group.rg.name
+  location             = azurerm_resource_group.rg.location
+  network_interface_id = module.vm[0].network_interface_id
+}
