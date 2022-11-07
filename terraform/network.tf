@@ -1,3 +1,27 @@
+################################
+# Virtual network
+################################
+resource "azurerm_virtual_network" "vnet" {
+  name                = "${var.prefix}-vnet"
+  address_space       = ["10.0.0.0/16"]
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_subnet" "public" {
+  name                 = "public"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
+
+resource "azurerm_subnet" "bastion" {
+  name                 = "AzureBastionSubnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.200.0/27"]
+}
+
 #################################
 # Network security group
 ################################
@@ -5,7 +29,7 @@
 resource "azurerm_network_security_group" "web" {
   name                = "web-nsg"
   location            = var.location
-  resource_group_name = azurerm_resource_group.network_rg.name
+  resource_group_name = azurerm_resource_group.rg.name
 }
 
 resource "azurerm_network_security_rule" "http" {
@@ -18,7 +42,7 @@ resource "azurerm_network_security_rule" "http" {
   destination_port_range      = "80"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.network_rg.name
+  resource_group_name         = azurerm_resource_group.rg.name
   network_security_group_name = azurerm_network_security_group.web.name
 }
 
@@ -32,25 +56,13 @@ resource "azurerm_network_security_rule" "https" {
   destination_port_range      = "443"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.network_rg.name
+  resource_group_name         = azurerm_resource_group.rg.name
   network_security_group_name = azurerm_network_security_group.web.name
-}
-
-resource "azurerm_subnet_network_security_group_association" "web" {
-  subnet_id                 = azurerm_subnet.public.id
-  network_security_group_id = azurerm_network_security_group.web.id
-}
-
-# Bastion
-resource "azurerm_network_security_group" "bastion" {
-  name                = "bastion-nsg"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.network_rg.name
 }
 
 resource "azurerm_network_security_rule" "rdp" {
   name                        = "AllowMyIpAddressRDPInbound"
-  priority                    = 100
+  priority                    = 120
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
@@ -58,13 +70,13 @@ resource "azurerm_network_security_rule" "rdp" {
   destination_port_range      = "3389"
   source_address_prefixes     = var.allowed_cidr
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.network_rg.name
-  network_security_group_name = azurerm_network_security_group.bastion.name
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.web.name
 }
 
 resource "azurerm_network_security_rule" "ssh" {
   name                        = "AllowMyIpAddressSSHInbound"
-  priority                    = 110
+  priority                    = 130
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
@@ -72,8 +84,8 @@ resource "azurerm_network_security_rule" "ssh" {
   destination_port_range      = "22"
   source_address_prefixes     = var.allowed_cidr
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.network_rg.name
-  network_security_group_name = azurerm_network_security_group.bastion.name
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.web.name
 }
 
 ## When deploying from a local machine
@@ -85,3 +97,8 @@ resource "azurerm_network_security_rule" "ssh" {
 #   myip         = chomp(data.http.ipify.response_body)
 #   allowed_cidr = "${local.myip}/32"
 # }
+
+resource "azurerm_subnet_network_security_group_association" "web" {
+  subnet_id                 = azurerm_subnet.public.id
+  network_security_group_id = azurerm_network_security_group.web.id
+}
