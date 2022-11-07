@@ -3,7 +3,7 @@ variable "prefix" {
   default = "terraform"
 }
 
-variable "region" {
+variable "location" {
   type    = string
   default = "japaneast"
 }
