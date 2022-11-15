@@ -26,7 +26,7 @@ module "windows_vm" {
   env                 = var.env
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  public_subnet_id    = azurerm_subnet.public.id
+  public_subnet_id    = azurerm_subnet.web.id
   vm_size             = var.vm_size
   vm_admin_username   = var.vm_admin_username
   vm_admin_password   = var.vm_admin_password
@@ -41,7 +41,7 @@ module "linux_vm" {
   env                 = var.env
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  public_subnet_id    = azurerm_subnet.public.id
+  public_subnet_id    = azurerm_subnet.web.id
   vm_size             = "Standard_DS1_v2"
   vm_admin_username   = var.vm_admin_username
 }
