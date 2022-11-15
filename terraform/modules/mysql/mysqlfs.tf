@@ -1,5 +1,9 @@
+locals {
+  mysql_flexible_server_name = "${var.prefix}-${var.env}-mysql${var.random}"
+}
+
 resource "azurerm_mysql_flexible_server" "this" {
-  name                   = "${var.prefix}-${var.env}-mysql${var.random}"
+  name                   = local.mysql_flexible_server_name
   resource_group_name    = var.resource_group_name
   location               = var.location
   administrator_login    = var.db_admin_username
@@ -38,7 +42,7 @@ resource "azurerm_mysql_flexible_server_configuration" "this" {
 }
 
 resource "azurerm_private_dns_zone" "this" {
-  name                = "${var.prefix}-${var.env}-mysql.private.mysql.database.azure.com"
+  name                = "${local.mysql_flexible_server_name}.private.mysql.database.azure.com"
   resource_group_name = var.resource_group_name
 }
 
@@ -47,12 +51,4 @@ resource "azurerm_private_dns_zone_virtual_network_link" "this" {
   resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.this.name
   virtual_network_id    = var.virtual_network_id
-}
-
-resource "azurerm_private_dns_a_record" "this" {
-  name                = "${var.prefix}-${var.env}-mysql"
-  zone_name           = azurerm_private_dns_zone.this.name
-  resource_group_name = var.resource_group_name
-  ttl                 = 30
-  records             = [var.db_subnet_cidr]
 }
