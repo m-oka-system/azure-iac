@@ -18,6 +18,11 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 }
 
+resource "random_integer" "num" {
+  min = 10000
+  max = 99999
+}
+
 module "windows_vm" {
   source = "./modules/vm/windows"
 
@@ -55,4 +60,22 @@ module "loadbalancer" {
   resource_group_name  = azurerm_resource_group.rg.name
   location             = azurerm_resource_group.rg.location
   network_interface_id = module.windows_vm[0].network_interface_id
+}
+
+module "mysql" {
+  source = "./modules/mysql"
+
+  count               = 0
+  prefix              = var.prefix
+  env                 = var.env
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  db_subnet_id        = azurerm_subnet.db.id
+  db_name             = var.db_name
+  db_admin_username   = var.db_admin_username
+  db_admin_password   = var.db_admin_password
+  db_size             = var.db_size
+  db_subnet_cidr      = trimsuffix(cidrsubnet(azurerm_subnet.db.address_prefixes[0], 8, 4), "/32") #10.0.2.0/24 -> 10.0.2.4
+  virtual_network_id  = azurerm_virtual_network.vnet.id
+  random              = random_integer.num.result
 }

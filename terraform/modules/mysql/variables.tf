@@ -1,0 +1,12 @@
+variable "prefix" {}
+variable "env" {}
+variable "location" {}
+variable "resource_group_name" {}
+variable "db_subnet_id" {}
+variable "db_name" {}
+variable "db_admin_username" {}
+variable "db_admin_password" {}
+variable "db_size" {}
+variable "db_subnet_cidr" {}
+variable "virtual_network_id" {}
+variable "random" {}

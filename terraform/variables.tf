@@ -43,8 +43,25 @@ variable "source_image_resource_group_name" {
   type = string
 }
 
+variable "db_name" {
+  type = string
+}
+
+variable "db_admin_username" {
+  type = string
+}
+
+variable "db_admin_password" {
+  type = string
+}
+
+variable "db_size" {
+  type = string
+}
+
 # Data Sources
 data "azurerm_image" "win2022_ja" {
   name                = var.source_image_name
   resource_group_name = var.source_image_resource_group_name
 }
+
