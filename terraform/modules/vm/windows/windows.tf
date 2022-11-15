@@ -2,7 +2,7 @@
 # Virtual machines
 ################################
 resource "azurerm_public_ip" "this" {
-  name                = "${var.prefix}-${var.env}-vm-ip"
+  name                = "${var.prefix}-${var.env}-win-vm-ip"
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "Standard"
@@ -10,7 +10,7 @@ resource "azurerm_public_ip" "this" {
 }
 
 resource "azurerm_network_interface" "this" {
-  name                = "${var.prefix}-${var.env}-vm-nic"
+  name                = "${var.prefix}-${var.env}-win-vm-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -23,7 +23,7 @@ resource "azurerm_network_interface" "this" {
 }
 
 resource "azurerm_windows_virtual_machine" "this" {
-  name                = "${var.prefix}-${var.env}-vm"
+  name                = "${var.prefix}-${var.env}-win-vm"
   resource_group_name = var.resource_group_name
   location            = var.location
   size                = var.vm_size
@@ -35,8 +35,10 @@ resource "azurerm_windows_virtual_machine" "this" {
     azurerm_network_interface.this.id,
   ]
 
+  boot_diagnostics {}
+
   os_disk {
-    name                 = "${var.prefix}-${var.env}-vm-osdisk"
+    name                 = "${var.prefix}-${var.env}-win-vm-osdisk"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
     disk_size_gb         = 30
