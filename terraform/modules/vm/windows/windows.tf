@@ -17,7 +17,7 @@ resource "azurerm_network_interface" "this" {
   ip_configuration {
     name                          = "ipconfig1"
     private_ip_address_allocation = "Dynamic"
-    subnet_id                     = var.public_subnet_id
+    subnet_id                     = var.web_subnet_id
     public_ip_address_id          = azurerm_public_ip.this.id
   }
 }
