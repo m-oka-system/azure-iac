@@ -18,8 +18,8 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 }
 
-module "vm" {
-  source = "./modules/vm"
+module "windows_vm" {
+  source = "./modules/vm/windows"
 
   count               = local.create_count
   prefix              = var.prefix
@@ -41,5 +41,5 @@ module "loadbalancer" {
   env                  = var.env
   resource_group_name  = azurerm_resource_group.rg.name
   location             = azurerm_resource_group.rg.location
-  network_interface_id = module.vm[0].network_interface_id
+  network_interface_id = module.windows_vm[0].network_interface_id
 }
