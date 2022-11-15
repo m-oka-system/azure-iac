@@ -33,6 +33,19 @@ module "windows_vm" {
   source_image_id     = data.azurerm_image.win2022_ja.id
 }
 
+module "linux_vm" {
+  source = "./modules/vm/linux"
+
+  count               = local.create_count
+  prefix              = var.prefix
+  env                 = var.env
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  public_subnet_id    = azurerm_subnet.public.id
+  vm_size             = "Standard_DS1_v2"
+  vm_admin_username   = var.vm_admin_username
+}
+
 module "loadbalancer" {
   source = "./modules/loadbalancer"
 
