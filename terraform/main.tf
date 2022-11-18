@@ -78,3 +78,14 @@ module "mysqlfs" {
   virtual_network_id  = azurerm_virtual_network.vnet.id
   random              = random_integer.num.result
 }
+
+module "appservice" {
+  source = "./modules/appservice/f1"
+
+  count               = local.create_count
+  prefix              = var.prefix
+  env                 = var.env
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  random              = random_integer.num.result
+}
