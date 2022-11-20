@@ -101,3 +101,14 @@ module "bastion" {
   bastion_subnet_id   = azurerm_subnet.bastion.id
 
 }
+
+module "vpngw" {
+  source = "./modules/vpngw"
+
+  count               = local.create_count
+  prefix              = var.prefix
+  env                 = var.env
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  gateway_subnet_id   = azurerm_subnet.gateway.id
+}
