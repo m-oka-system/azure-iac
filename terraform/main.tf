@@ -75,6 +75,6 @@ module "mysqlfs" {
   db_admin_username   = var.db_admin_username
   db_admin_password   = var.db_admin_password
   db_size             = var.db_size
-  virtual_network_id  = azurerm_virtual_network.vnet.id
+  virtual_network_id  = azurerm_virtual_network.spoke1.id
   random              = random_integer.num.result
 }

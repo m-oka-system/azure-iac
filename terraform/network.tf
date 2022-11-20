@@ -1,9 +1,37 @@
 ################################
 # Virtual network
 ################################
-resource "azurerm_virtual_network" "vnet" {
-  name                = "${var.prefix}-vnet"
+resource "azurerm_virtual_network" "hub" {
+  name                = "${var.prefix}-${var.env}-hub-vnet"
   address_space       = ["10.0.0.0/16"]
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_subnet" "bastion" {
+  name                 = "AzureBastionSubnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.0.0.64/27"] # 10.0.0.64 - 10.0.0.95
+}
+
+resource "azurerm_subnet" "gateway" {
+  name                 = "GatewaySubnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.0.0.0/27"] # 10.0.0.0 - 10.0.0.31
+}
+
+resource "azurerm_subnet" "firewall" {
+  name                 = "AzureFirewallSubnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.0.6.0/24"] # 10.0.6.0 - 10.0.6.255
+}
+
+resource "azurerm_virtual_network" "spoke1" {
+  name                = "${var.prefix}-${var.env}-spoke1-vnet"
+  address_space       = ["10.10.0.0/16"]
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
 }
@@ -11,15 +39,15 @@ resource "azurerm_virtual_network" "vnet" {
 resource "azurerm_subnet" "web" {
   name                 = "web"
   resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.1.0/24"]
+  virtual_network_name = azurerm_virtual_network.spoke1.name
+  address_prefixes     = ["10.10.1.0/24"]
 }
 
 resource "azurerm_subnet" "db" {
   name                 = "db"
   resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.2.0/24"]
+  virtual_network_name = azurerm_virtual_network.spoke1.name
+  address_prefixes     = ["10.10.2.0/24"]
 
   delegation {
     name = "dlg-Microsoft.DBforMySQL-flexibleServers"
@@ -31,11 +59,29 @@ resource "azurerm_subnet" "db" {
   }
 }
 
-resource "azurerm_subnet" "bastion" {
-  name                 = "AzureBastionSubnet"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.200.0/27"]
+################################
+# Vnet peering
+################################
+resource "azurerm_virtual_network_peering" "to_spoke1" {
+  name                         = "toSpoke1"
+  resource_group_name          = azurerm_resource_group.rg.name
+  virtual_network_name         = azurerm_virtual_network.hub.name
+  remote_virtual_network_id    = azurerm_virtual_network.spoke1.id
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+}
+
+resource "azurerm_virtual_network_peering" "to_hub" {
+  name                         = "toHub"
+  resource_group_name          = azurerm_resource_group.rg.name
+  virtual_network_name         = azurerm_virtual_network.spoke1.name
+  remote_virtual_network_id    = azurerm_virtual_network.hub.id
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
 }
 
 #################################
