@@ -12,14 +12,14 @@ resource "azurerm_subnet" "bastion" {
   name                 = "AzureBastionSubnet"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.hub.name
-  address_prefixes     = ["10.0.0.64/27"] # 10.0.0.64 - 10.0.0.95
+  address_prefixes     = ["10.0.0.64/26"] # 10.0.0.64 - 10.0.0.127
 }
 
 resource "azurerm_subnet" "gateway" {
   name                 = "GatewaySubnet"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.hub.name
-  address_prefixes     = ["10.0.0.0/27"] # 10.0.0.0 - 10.0.0.31
+  address_prefixes     = ["10.0.0.0/26"] # 10.0.0.0 - 10.0.0.63
 }
 
 resource "azurerm_subnet" "firewall" {
