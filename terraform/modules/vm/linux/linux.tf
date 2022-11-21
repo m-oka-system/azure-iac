@@ -59,6 +59,13 @@ resource "azurerm_linux_virtual_machine" "this" {
     write_accelerator_enabled = false
   }
 
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      var.managed_id_reader
+    ]
+  }
+
   source_image_reference {
     offer     = "0001-com-ubuntu-server-focal"
     publisher = "canonical"

@@ -7,3 +7,4 @@ variable "vm_size" {}
 variable "vm_admin_username" {}
 variable "vm_admin_password" {}
 variable "source_image_id" {}
+variable "managed_id_reader" {}

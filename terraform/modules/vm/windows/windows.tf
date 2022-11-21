@@ -44,6 +44,13 @@ resource "azurerm_windows_virtual_machine" "this" {
     disk_size_gb         = 30
   }
 
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      var.managed_id_reader
+    ]
+  }
+
   source_image_id = var.source_image_id
 }
 

@@ -36,6 +36,7 @@ module "windows_vm" {
   vm_admin_username   = var.vm_admin_username
   vm_admin_password   = var.vm_admin_password
   source_image_id     = data.azurerm_image.win2022_ja.id
+  managed_id_reader   = azurerm_user_assigned_identity.reader.id
 }
 
 module "linux_vm" {
@@ -49,6 +50,7 @@ module "linux_vm" {
   web_subnet_id       = azurerm_subnet.web.id
   vm_size             = "Standard_DS1_v2"
   vm_admin_username   = var.vm_admin_username
+  managed_id_reader   = azurerm_user_assigned_identity.reader.id
 }
 
 module "loadbalancer" {
