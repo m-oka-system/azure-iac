@@ -43,11 +43,18 @@ resource "azurerm_subnet" "web" {
   address_prefixes     = ["10.10.1.0/24"]
 }
 
+resource "azurerm_subnet" "app" {
+  name                 = "app"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.spoke1.name
+  address_prefixes     = ["10.10.2.0/24"]
+}
+
 resource "azurerm_subnet" "db" {
   name                 = "db"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.spoke1.name
-  address_prefixes     = ["10.10.2.0/24"]
+  address_prefixes     = ["10.10.3.0/24"]
 
   delegation {
     name = "dlg-Microsoft.DBforMySQL-flexibleServers"
@@ -87,16 +94,30 @@ resource "azurerm_virtual_network_peering" "to_hub" {
 #################################
 # Network security group
 ################################
-# Web
+# Application Gateway
 resource "azurerm_network_security_group" "web" {
-  name                = "web-nsg"
+  name                = "${var.prefix}-${var.env}-web-nsg"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
 }
 
-resource "azurerm_network_security_rule" "http" {
-  name                        = "AllowAnyHTTPInbound"
+resource "azurerm_network_security_rule" "in_appgw_from_gwmgr" {
+  name                        = "AllowGatewayManagerInbound"
   priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "65200-65535" # For Application Gateway v2 SKUs, incoming requests with ports 65200-65535 must be allowed.
+  source_address_prefix       = "GatewayManager"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.web.name
+}
+
+resource "azurerm_network_security_rule" "in_http_from_all" {
+  name                        = "AllowAnyHTTPInbound"
+  priority                    = 110
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
@@ -108,9 +129,9 @@ resource "azurerm_network_security_rule" "http" {
   network_security_group_name = azurerm_network_security_group.web.name
 }
 
-resource "azurerm_network_security_rule" "https" {
+resource "azurerm_network_security_rule" "in_https_from_all" {
   name                        = "AllowAnyHTTPSInbound"
-  priority                    = 110
+  priority                    = 120
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
@@ -122,7 +143,47 @@ resource "azurerm_network_security_rule" "https" {
   network_security_group_name = azurerm_network_security_group.web.name
 }
 
-resource "azurerm_network_security_rule" "rdp" {
+resource "azurerm_subnet_network_security_group_association" "web" {
+  subnet_id                 = azurerm_subnet.web.id
+  network_security_group_id = azurerm_network_security_group.web.id
+}
+
+# App
+resource "azurerm_network_security_group" "app" {
+  name                = "${var.prefix}-${var.env}-app-nsg"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_network_security_rule" "in_http_from_myip" {
+  name                        = "AllowMyIpAddressHTTPInbound"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "80"
+  source_address_prefixes     = var.allowed_cidr
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.app.name
+}
+
+resource "azurerm_network_security_rule" "in_https_from_myip" {
+  name                        = "AllowMyIpAddressHTTPSInbound"
+  priority                    = 110
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "443"
+  source_address_prefixes     = var.allowed_cidr
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.app.name
+}
+
+resource "azurerm_network_security_rule" "in_rdp_from_myip" {
   name                        = "AllowMyIpAddressRDPInbound"
   priority                    = 120
   direction                   = "Inbound"
@@ -133,10 +194,10 @@ resource "azurerm_network_security_rule" "rdp" {
   source_address_prefixes     = var.allowed_cidr
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = azurerm_network_security_group.web.name
+  network_security_group_name = azurerm_network_security_group.app.name
 }
 
-resource "azurerm_network_security_rule" "ssh" {
+resource "azurerm_network_security_rule" "in_ssh_from_myip" {
   name                        = "AllowMyIpAddressSSHInbound"
   priority                    = 130
   direction                   = "Inbound"
@@ -147,7 +208,12 @@ resource "azurerm_network_security_rule" "ssh" {
   source_address_prefixes     = var.allowed_cidr
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = azurerm_network_security_group.web.name
+  network_security_group_name = azurerm_network_security_group.app.name
+}
+
+resource "azurerm_subnet_network_security_group_association" "app" {
+  subnet_id                 = azurerm_subnet.app.id
+  network_security_group_id = azurerm_network_security_group.app.id
 }
 
 ## When deploying from a local machine
@@ -159,8 +225,3 @@ resource "azurerm_network_security_rule" "ssh" {
 #   myip         = chomp(data.http.ipify.response_body)
 #   allowed_cidr = "${local.myip}/32"
 # }
-
-resource "azurerm_subnet_network_security_group_association" "web" {
-  subnet_id                 = azurerm_subnet.web.id
-  network_security_group_id = azurerm_network_security_group.web.id
-}
