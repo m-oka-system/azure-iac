@@ -43,6 +43,7 @@ resource "azurerm_linux_virtual_machine" "this" {
   patch_mode                      = "ImageDefault"
   secure_boot_enabled             = false
   vtpm_enabled                    = false
+  custom_data                     = filebase64("${path.module}/userdata.sh")
 
   admin_ssh_key {
     username   = var.vm_admin_username
@@ -72,5 +73,6 @@ resource "azurerm_linux_virtual_machine" "this" {
     sku       = "20_04-lts-gen2"
     version   = "latest"
   }
+
 }
 
