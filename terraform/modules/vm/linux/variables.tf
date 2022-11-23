@@ -1,4 +1,5 @@
 variable "prefix" {}
+variable "suffix" {}
 variable "env" {}
 variable "location" {}
 variable "resource_group_name" {}

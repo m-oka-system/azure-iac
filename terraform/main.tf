@@ -44,6 +44,7 @@ module "linux_vm" {
 
   count               = local.create_count
   prefix              = var.prefix
+  suffix              = format("%02d", count.index + 1)
   env                 = var.env
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location

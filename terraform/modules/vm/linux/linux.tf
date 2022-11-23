@@ -3,7 +3,7 @@
 # Virtual machines
 ################################
 resource "azurerm_public_ip" "this" {
-  name                = "${var.prefix}-${var.env}-linux-vm-ip"
+  name                = "${var.prefix}-${var.env}-linux-vm-ip-${var.suffix}"
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "Standard"
@@ -11,7 +11,7 @@ resource "azurerm_public_ip" "this" {
 }
 
 resource "azurerm_network_interface" "this" {
-  name                = "${var.prefix}-${var.env}-linux-vm-nic"
+  name                = "${var.prefix}-${var.env}-linux-vm-nic-${var.suffix}"
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -24,7 +24,8 @@ resource "azurerm_network_interface" "this" {
 }
 
 resource "azurerm_linux_virtual_machine" "this" {
-  name                = "${var.prefix}-${var.env}-linux-vm"
+  name                = "${var.prefix}-${var.env}-linux-vm-${var.suffix}"
+  computer_name       = "${var.prefix}${var.env}linuxvm${var.suffix}"
   resource_group_name = var.resource_group_name
   location            = var.location
   size                = var.vm_size
@@ -53,7 +54,7 @@ resource "azurerm_linux_virtual_machine" "this" {
   boot_diagnostics {}
 
   os_disk {
-    name                      = "${var.prefix}-${var.env}-linux-vm-osdisk"
+    name                      = "${var.prefix}-${var.env}-linux-vm-osdisk-${var.suffix}"
     caching                   = "ReadWrite"
     storage_account_type      = "Standard_LRS"
     disk_size_gb              = 30
