@@ -48,6 +48,7 @@ resource "azurerm_subnet" "app" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.spoke1.name
   address_prefixes     = ["10.10.2.0/24"]
+  service_endpoints    = ["Microsoft.KeyVault"]
 }
 
 resource "azurerm_subnet" "db" {
@@ -205,6 +206,20 @@ resource "azurerm_network_security_rule" "in_ssh_from_myip" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
+  source_address_prefixes     = var.allowed_cidr
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.app.name
+}
+
+resource "azurerm_network_security_rule" "in_rails_from_myip" {
+  name                        = "AllowMyIpAddressRailsInbound"
+  priority                    = 140
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "3000"
   source_address_prefixes     = var.allowed_cidr
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.rg.name

@@ -59,6 +59,18 @@ variable "db_size" {
   type = string
 }
 
+variable "docker_username" {
+  type = string
+}
+
+variable "docker_password" {
+  type = string
+}
+
+variable "secret_key_base" {
+  type = string
+}
+
 # Data Sources
 data "azurerm_image" "win2022_ja" {
   name                = var.source_image_name

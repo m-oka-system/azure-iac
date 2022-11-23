@@ -9,3 +9,4 @@ variable "db_admin_password" {}
 variable "db_size" {}
 variable "virtual_network_id" {}
 variable "random" {}
+variable "app_keyvault_id" {}

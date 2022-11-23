@@ -36,7 +36,7 @@ module "windows_vm" {
   vm_admin_username   = var.vm_admin_username
   vm_admin_password   = var.vm_admin_password
   source_image_id     = data.azurerm_image.win2022_ja.id
-  managed_id_reader   = azurerm_user_assigned_identity.reader.id
+  managed_id_reader   = azurerm_user_assigned_identity.app.id
 }
 
 module "linux_vm" {
@@ -50,18 +50,8 @@ module "linux_vm" {
   web_subnet_id       = azurerm_subnet.app.id
   vm_size             = "Standard_DS1_v2"
   vm_admin_username   = var.vm_admin_username
-  managed_id_reader   = azurerm_user_assigned_identity.reader.id
-}
-
-module "loadbalancer" {
-  source = "./modules/loadbalancer"
-
-  count                = local.create_count
-  prefix               = var.prefix
-  env                  = var.env
-  resource_group_name  = azurerm_resource_group.rg.name
-  location             = azurerm_resource_group.rg.location
-  network_interface_id = module.windows_vm[0].network_interface_id
+  managed_id_reader   = azurerm_user_assigned_identity.app.id
+  depends_on          = [module.mysqlfs]
 }
 
 module "mysqlfs" {
@@ -79,6 +69,7 @@ module "mysqlfs" {
   db_size             = var.db_size
   virtual_network_id  = azurerm_virtual_network.spoke1.id
   random              = random_integer.num.result
+  app_keyvault_id     = azurerm_key_vault.app.id
 }
 
 module "appservice" {
@@ -102,6 +93,17 @@ module "bastion" {
   location            = azurerm_resource_group.rg.location
   bastion_subnet_id   = azurerm_subnet.bastion.id
 
+}
+
+module "loadbalancer" {
+  source = "./modules/loadbalancer"
+
+  count                = local.create_count
+  prefix               = var.prefix
+  env                  = var.env
+  resource_group_name  = azurerm_resource_group.rg.name
+  location             = azurerm_resource_group.rg.location
+  network_interface_id = module.windows_vm[0].network_interface_id
 }
 
 module "vpngw" {

@@ -17,3 +17,7 @@ az role assignment create --assignee "$appId" \
 az role assignment create --assignee "$appId" \
   --role "User Access Administrator" \
   --subscription "${ARM_SUBSCRIPTION_ID}"
+
+az role assignment create --assignee "$appId" \
+  --role "Key Vault Administrator" \
+  --subscription "${ARM_SUBSCRIPTION_ID}"
