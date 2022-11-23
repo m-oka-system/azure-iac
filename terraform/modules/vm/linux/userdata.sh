@@ -19,6 +19,9 @@ sudo snap install docker
 sudo addgroup --system docker
 sudo adduser cloudadmin docker
 
+# Azure log in using a VM's managed identity
+az login --identity
+
 # Docker login and pull image
 IMAGE="mokasystem/scaffold"
 TAG="latest"
@@ -26,9 +29,6 @@ DOCKER_USERNAME=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault -
 DOCKER_PASSWORD=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault --name DOCKER-PASSWORD --query value -o tsv)
 echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 sudo docker pull ${IMAGE}:${TAG}
-
-# Azure log in using a VM's managed identity
-az login --identity
 
 # Application Environment Variables
 RDS_HOST_NAME=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault --name MYSQL-HOST --query value -o tsv)
