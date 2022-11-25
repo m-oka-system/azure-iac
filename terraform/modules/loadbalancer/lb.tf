@@ -7,6 +7,7 @@ resource "azurerm_public_ip" "lb_ip" {
   location            = var.location
   sku                 = "Standard"
   allocation_method   = "Static"
+  zones               = ["1", "2", "3"]
 }
 
 resource "azurerm_lb" "lb" {

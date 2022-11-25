@@ -8,6 +8,7 @@ resource "azurerm_public_ip" "this" {
   location            = var.location
   sku                 = "Standard"
   allocation_method   = "Static"
+  zones               = ["1", "2", "3"]
 }
 
 resource "azurerm_network_interface" "this" {
@@ -18,7 +19,7 @@ resource "azurerm_network_interface" "this" {
   ip_configuration {
     name                          = "ipconfig1"
     private_ip_address_allocation = "Dynamic"
-    subnet_id                     = var.web_subnet_id
+    subnet_id                     = var.app_subnet_id
     public_ip_address_id          = azurerm_public_ip.this.id
   }
 }
@@ -64,7 +65,7 @@ resource "azurerm_linux_virtual_machine" "this" {
   identity {
     type = "UserAssigned"
     identity_ids = [
-      var.managed_id_reader
+      var.app_managed_id
     ]
   }
 
