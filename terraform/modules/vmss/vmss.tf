@@ -43,8 +43,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
       primary                                      = true
       subnet_id                                    = var.app_subnet_id
       version                                      = "IPv4"
-      application_gateway_backend_address_pool_ids = []
-      load_balancer_backend_address_pool_ids       = []
+      application_gateway_backend_address_pool_ids = [var.backend_address_pool_id]
 
       public_ip_address {
         name                    = "${local.virtual_machine_scale_set_name}-ip"
