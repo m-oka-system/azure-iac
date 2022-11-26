@@ -31,12 +31,12 @@ module "windows_vm" {
   env                 = var.env
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  web_subnet_id       = azurerm_subnet.app.id
+  app_subnet_id       = azurerm_subnet.app.id
   vm_size             = var.vm_size
   vm_admin_username   = var.vm_admin_username
   vm_admin_password   = var.vm_admin_password
   source_image_id     = data.azurerm_image.win2022_ja.id
-  managed_id_reader   = azurerm_user_assigned_identity.app.id
+  app_managed_id      = azurerm_user_assigned_identity.app.id
 }
 
 module "linux_vm" {
@@ -48,10 +48,25 @@ module "linux_vm" {
   env                 = var.env
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  web_subnet_id       = azurerm_subnet.app.id
+  app_subnet_id       = azurerm_subnet.app.id
   vm_size             = "Standard_DS1_v2"
   vm_admin_username   = var.vm_admin_username
-  managed_id_reader   = azurerm_user_assigned_identity.app.id
+  app_managed_id      = azurerm_user_assigned_identity.app.id
+  depends_on          = [module.mysqlfs]
+}
+
+module "vmss" {
+  source = "./modules/vmss"
+
+  count               = local.create_count
+  prefix              = var.prefix
+  env                 = var.env
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  app_subnet_id       = azurerm_subnet.app.id
+  vm_size             = "Standard_DS1_v2"
+  vm_admin_username   = var.vm_admin_username
+  app_managed_id      = azurerm_user_assigned_identity.app.id
   depends_on          = [module.mysqlfs]
 }
 
