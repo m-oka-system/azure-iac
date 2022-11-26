@@ -71,6 +71,10 @@ variable "secret_key_base" {
   type = string
 }
 
+variable "dns_zone_name" {
+  type = string
+}
+
 # Data Sources
 data "azurerm_image" "win2022_ja" {
   name                = var.source_image_name
