@@ -41,6 +41,7 @@ resource "azurerm_subnet" "web" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.spoke1.name
   address_prefixes     = ["10.10.1.0/24"]
+  service_endpoints    = ["Microsoft.KeyVault"]
 }
 
 resource "azurerm_subnet" "app" {

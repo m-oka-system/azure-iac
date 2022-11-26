@@ -122,6 +122,20 @@ module "loadbalancer" {
   network_interface_id = module.windows_vm[0].network_interface_id
 }
 
+module "appgw" {
+  source = "./modules/applicationgateway"
+
+  count                              = local.create_count
+  prefix                             = var.prefix
+  env                                = var.env
+  resource_group_name                = azurerm_resource_group.rg.name
+  location                           = azurerm_resource_group.rg.location
+  web_subnet_id                      = azurerm_subnet.web.id
+  appgw_managed_id                   = azurerm_user_assigned_identity.appgw.id
+  app_selfcert_name                  = azurerm_key_vault_certificate.appgw.name
+  app_selfcert_versionless_secret_id = azurerm_key_vault_certificate.appgw.versionless_secret_id
+}
+
 module "vpngw" {
   source = "./modules/vpngw"
 
