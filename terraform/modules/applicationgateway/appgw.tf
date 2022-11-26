@@ -151,5 +151,5 @@ resource "azurerm_application_gateway" "this" {
 # resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "this" {
 #   ip_configuration_name   = "ipconfig1"
 #   backend_address_pool_id = tolist(azurerm_application_gateway.this.backend_address_pool).0.id
-#   network_interface_id    = "/subscriptions/14eac771-6a7b-423a-b6ca-d35eca40ba36/resourceGroups/tf-dev-rg/providers/Microsoft.Network/networkInterfaces/tf-dev-linux-vm-nic-01"
+#   network_interface_id    = var.vm_network_interface_id
 # }
