@@ -5,21 +5,22 @@ data "azurerm_subscription" "primary" {
 }
 
 # VM
+locals {
+  app_roles = [
+    "Reader",
+    "Key Vault Secrets User",
+  ]
+}
 resource "azurerm_user_assigned_identity" "app" {
   name                = "${var.prefix}-${var.env}-app-mngid"
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
 }
 
-resource "azurerm_role_assignment" "reader" {
+resource "azurerm_role_assignment" "app" {
+  count                = length(local.app_roles)
   scope                = "${data.azurerm_subscription.primary.id}/resourceGroups/${azurerm_resource_group.rg.name}"
-  role_definition_name = "Reader"
-  principal_id         = azurerm_user_assigned_identity.app.principal_id
-}
-
-resource "azurerm_role_assignment" "kv_secrets_user" {
-  scope                = "${data.azurerm_subscription.primary.id}/resourceGroups/${azurerm_resource_group.rg.name}"
-  role_definition_name = "Key Vault Secrets User"
+  role_definition_name = local.app_roles[count.index]
   principal_id         = azurerm_user_assigned_identity.app.principal_id
 }
 
@@ -34,6 +35,26 @@ resource "azurerm_role_assignment" "kv_reader" {
   scope                = "${data.azurerm_subscription.primary.id}/resourceGroups/${azurerm_resource_group.rg.name}"
   role_definition_name = "Key Vault Reader"
   principal_id         = azurerm_user_assigned_identity.appgw.principal_id
+}
+
+# Web App for Containers
+locals {
+  webappcontainer_roles = [
+    "AcrPull",
+    "Key Vault Secrets User",
+  ]
+}
+resource "azurerm_user_assigned_identity" "webappcontainer" {
+  name                = "${var.prefix}-${var.env}-webappcontainer-mngid"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = var.location
+}
+
+resource "azurerm_role_assignment" "webappcontainer" {
+  count                = length(local.webappcontainer_roles)
+  scope                = "${data.azurerm_subscription.primary.id}/resourceGroups/${azurerm_resource_group.rg.name}"
+  role_definition_name = local.webappcontainer_roles[count.index]
+  principal_id         = azurerm_user_assigned_identity.webappcontainer.principal_id
 }
 
 ################################

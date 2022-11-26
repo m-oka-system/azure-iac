@@ -49,7 +49,18 @@ resource "azurerm_subnet" "app" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.spoke1.name
   address_prefixes     = ["10.10.2.0/24"]
-  service_endpoints    = ["Microsoft.KeyVault"]
+  service_endpoints = [
+    "Microsoft.KeyVault",
+    "Microsoft.Storage",
+  ]
+  delegation {
+    name = "delegation"
+
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
 }
 
 resource "azurerm_subnet" "db" {

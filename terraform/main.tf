@@ -163,3 +163,14 @@ module "vpngw" {
   location            = azurerm_resource_group.rg.location
   gateway_subnet_id   = azurerm_subnet.gateway.id
 }
+
+module "webappcontainer" {
+  source = "./modules/appservice/container"
+
+  count                      = local.create_count
+  prefix                     = var.prefix
+  env                        = var.env
+  resource_group_name        = azurerm_resource_group.rg.name
+  location                   = azurerm_resource_group.rg.location
+  webappcontainer_managed_id = azurerm_user_assigned_identity.webappcontainer.id
+}
