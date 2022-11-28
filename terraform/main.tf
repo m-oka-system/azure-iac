@@ -172,8 +172,10 @@ module "webappcontainer" {
   env                        = var.env
   resource_group_name        = azurerm_resource_group.rg.name
   location                   = azurerm_resource_group.rg.location
+  random                     = random_integer.num.result
   webappcontainer_managed_id = azurerm_user_assigned_identity.webappcontainer.id
   webappcontainer_client_id  = azurerm_user_assigned_identity.webappcontainer.client_id
+  webappcontainer_subnet_id  = azurerm_subnet.app.id
   vault_name                 = azurerm_key_vault.app.name
   secret_key_base_uri        = azurerm_key_vault_secret.secret_key_base.versionless_id
   docker_image_name          = var.docker_image_name
