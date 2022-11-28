@@ -173,4 +173,9 @@ module "webappcontainer" {
   resource_group_name        = azurerm_resource_group.rg.name
   location                   = azurerm_resource_group.rg.location
   webappcontainer_managed_id = azurerm_user_assigned_identity.webappcontainer.id
+  webappcontainer_client_id  = azurerm_user_assigned_identity.webappcontainer.client_id
+  vault_name                 = azurerm_key_vault.app.name
+  secret_key_base_uri        = azurerm_key_vault_secret.secret_key_base.versionless_id
+  docker_image_name          = var.docker_image_name
+  docker_image_tag           = var.docker_image_tag
 }

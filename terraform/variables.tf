@@ -75,6 +75,14 @@ variable "dns_zone_name" {
   type = string
 }
 
+variable "docker_image_name" {
+  type = string
+}
+
+variable "docker_image_tag" {
+  type = string
+}
+
 # Data Sources
 data "azurerm_image" "win2022_ja" {
   name                = var.source_image_name
