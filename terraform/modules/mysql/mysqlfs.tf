@@ -9,8 +9,8 @@ resource "azurerm_mysql_flexible_server" "this" {
   name                   = local.mysql_flexible_server_name
   resource_group_name    = var.resource_group_name
   location               = var.location
-  administrator_login    = var.db_admin_username
-  administrator_password = var.db_admin_password
+  administrator_login    = var.db_username
+  administrator_password = var.db_password
   sku_name               = var.db_size
   version                = "8.0.21"
   zone                   = "1"
@@ -59,20 +59,20 @@ resource "azurerm_private_dns_zone_virtual_network_link" "this" {
 ################################
 # Key Vault secrets
 ################################
-resource "azurerm_key_vault_secret" "mysql_host" {
-  name         = "MYSQL-HOST"
+resource "azurerm_key_vault_secret" "db_host" {
+  name         = "DB-HOST"
   value        = azurerm_mysql_flexible_server.this.fqdn
   key_vault_id = var.app_keyvault_id
 }
 
-resource "azurerm_key_vault_secret" "mysql_username" {
-  name         = "MYSQL-USERNAME"
-  value        = var.db_admin_username
+resource "azurerm_key_vault_secret" "db_username" {
+  name         = "DB-USERNAME"
+  value        = var.db_username
   key_vault_id = var.app_keyvault_id
 }
 
-resource "azurerm_key_vault_secret" "mysql_password" {
-  name         = "MYSQL-PASSWORD"
-  value        = var.db_admin_password
+resource "azurerm_key_vault_secret" "db_password" {
+  name         = "DB-PASSWORD"
+  value        = var.db_password
   key_vault_id = var.app_keyvault_id
 }

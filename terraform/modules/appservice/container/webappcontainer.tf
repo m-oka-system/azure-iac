@@ -34,9 +34,9 @@ resource "azurerm_linux_web_app" "this" {
     "WEBSITES_PORT"                       = "3000"
     "RAILS_ENV"                           = "production"
     "RAILS_SERVE_STATIC_FILES"            = "1"
-    "RDS_HOST_NAME"                       = "@Microsoft.KeyVault(VaultName=${var.vault_name};SecretName=MYSQL-HOST)"
-    "MYSQL_ROOT_USER"                     = "@Microsoft.KeyVault(VaultName=${var.vault_name};SecretName=MYSQL-USERNAME)"
-    "MYSQL_ROOT_PASSWORD"                 = "@Microsoft.KeyVault(VaultName=${var.vault_name};SecretName=MYSQL-PASSWORD)"
+    "DB_HOST"                             = "@Microsoft.KeyVault(VaultName=${var.app_keyvault_name};SecretName=DB-HOST)"
+    "DB_USERNAME"                         = "@Microsoft.KeyVault(VaultName=${var.app_keyvault_name};SecretName=DB-USERNAME)"
+    "DB_PASSWORD"                         = "@Microsoft.KeyVault(VaultName=${var.app_keyvault_name};SecretName=DB-PASSWORD)"
     "SECRET_KEY_BASE"                     = "@Microsoft.KeyVault(SecretUri=${var.secret_key_base_uri})"
   }
 

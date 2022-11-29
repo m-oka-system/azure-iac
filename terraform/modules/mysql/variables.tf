@@ -4,8 +4,8 @@ variable "location" {}
 variable "resource_group_name" {}
 variable "db_subnet_id" {}
 variable "db_name" {}
-variable "db_admin_username" {}
-variable "db_admin_password" {}
+variable "db_username" {}
+variable "db_password" {}
 variable "db_size" {}
 variable "virtual_network_id" {}
 variable "random" {}

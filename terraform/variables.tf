@@ -47,11 +47,11 @@ variable "db_name" {
   type = string
 }
 
-variable "db_admin_username" {
+variable "db_username" {
   type = string
 }
 
-variable "db_admin_password" {
+variable "db_password" {
   type = string
 }
 

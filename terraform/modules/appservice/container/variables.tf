@@ -6,7 +6,7 @@ variable "random" {}
 variable "webappcontainer_managed_id" {}
 variable "webappcontainer_client_id" {}
 variable "webappcontainer_subnet_id" {}
-variable "vault_name" {}
+variable "app_keyvault_name" {}
 variable "secret_key_base_uri" {}
 variable "docker_image_name" {}
 variable "docker_image_tag" {}

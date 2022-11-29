@@ -84,8 +84,8 @@ module "mysqlfs" {
   location            = azurerm_resource_group.rg.location
   db_subnet_id        = azurerm_subnet.db.id
   db_name             = var.db_name
-  db_admin_username   = var.db_admin_username
-  db_admin_password   = var.db_admin_password
+  db_username         = var.db_username
+  db_password         = var.db_password
   db_size             = var.db_size
   virtual_network_id  = azurerm_virtual_network.spoke1.id
   random              = random_integer.num.result
@@ -176,8 +176,9 @@ module "webappcontainer" {
   webappcontainer_managed_id = azurerm_user_assigned_identity.webappcontainer.id
   webappcontainer_client_id  = azurerm_user_assigned_identity.webappcontainer.client_id
   webappcontainer_subnet_id  = azurerm_subnet.app.id
-  vault_name                 = azurerm_key_vault.app.name
+  app_keyvault_name          = azurerm_key_vault.app.name
   secret_key_base_uri        = azurerm_key_vault_secret.secret_key_base.versionless_id
   docker_image_name          = var.docker_image_name
   docker_image_tag           = var.docker_image_tag
+  depends_on                 = [module.mysqlfs]
 }
