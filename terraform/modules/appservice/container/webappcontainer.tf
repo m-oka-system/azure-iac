@@ -64,6 +64,10 @@ resource "azurerm_linux_web_app" "this" {
       docker_image_tag = var.docker_image_tag
     }
   }
+
+  lifecycle {
+    ignore_changes = [site_config[0].application_stack[0].docker_image_tag]
+  }
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "this" {
