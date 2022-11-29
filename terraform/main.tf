@@ -55,43 +55,6 @@ module "linux_vm" {
   depends_on          = [module.mysqlfs]
 }
 
-module "vmss" {
-  source = "./modules/vmss"
-
-  count                   = local.create_count
-  prefix                  = var.prefix
-  env                     = var.env
-  resource_group_name     = azurerm_resource_group.rg.name
-  location                = azurerm_resource_group.rg.location
-  app_subnet_id           = azurerm_subnet.app.id
-  vm_size                 = "Standard_DS1_v2"
-  vm_admin_username       = var.vm_admin_username
-  app_managed_id          = azurerm_user_assigned_identity.app.id
-  backend_address_pool_id = module.appgw[0].application_gateway_backend_address_pool_id
-  depends_on = [
-    module.mysqlfs,
-    module.appgw,
-  ]
-}
-
-module "mysqlfs" {
-  source = "./modules/mysql"
-
-  count               = local.create_count
-  prefix              = var.prefix
-  env                 = var.env
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  db_subnet_id        = azurerm_subnet.db.id
-  db_name             = var.db_name
-  db_username         = var.db_username
-  db_password         = var.db_password
-  db_size             = var.db_size
-  virtual_network_id  = azurerm_virtual_network.spoke1.id
-  random              = random_integer.num.result
-  app_keyvault_id     = azurerm_key_vault.app.id
-}
-
 module "appservice" {
   source = "./modules/appservice/f1"
 
@@ -113,6 +76,17 @@ module "bastion" {
   location            = azurerm_resource_group.rg.location
   bastion_subnet_id   = azurerm_subnet.bastion.id
 
+}
+
+module "vpngw" {
+  source = "./modules/vpngw"
+
+  count               = local.create_count
+  prefix              = var.prefix
+  env                 = var.env
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  gateway_subnet_id   = azurerm_subnet.gateway.id
 }
 
 module "loadbalancer" {
@@ -153,15 +127,23 @@ module "dns" {
   depends_on          = [module.appgw]
 }
 
-module "vpngw" {
-  source = "./modules/vpngw"
+module "vmss" {
+  source = "./modules/vmss"
 
-  count               = local.create_count
-  prefix              = var.prefix
-  env                 = var.env
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  gateway_subnet_id   = azurerm_subnet.gateway.id
+  count                   = local.create_count
+  prefix                  = var.prefix
+  env                     = var.env
+  resource_group_name     = azurerm_resource_group.rg.name
+  location                = azurerm_resource_group.rg.location
+  app_subnet_id           = azurerm_subnet.app.id
+  vm_size                 = "Standard_DS1_v2"
+  vm_admin_username       = var.vm_admin_username
+  app_managed_id          = azurerm_user_assigned_identity.app.id
+  backend_address_pool_id = module.appgw[0].application_gateway_backend_address_pool_id
+  depends_on = [
+    module.mysqlfs,
+    module.appgw,
+  ]
 }
 
 module "webappcontainer" {
@@ -181,4 +163,22 @@ module "webappcontainer" {
   docker_image_name          = var.docker_image_name
   docker_image_tag           = var.docker_image_tag
   depends_on                 = [module.mysqlfs]
+}
+
+module "mysqlfs" {
+  source = "./modules/mysql"
+
+  count               = local.create_count
+  prefix              = var.prefix
+  env                 = var.env
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  db_subnet_id        = azurerm_subnet.db.id
+  db_name             = var.db_name
+  db_username         = var.db_username
+  db_password         = var.db_password
+  db_size             = var.db_size
+  virtual_network_id  = azurerm_virtual_network.spoke1.id
+  random              = random_integer.num.result
+  app_keyvault_id     = azurerm_key_vault.app.id
 }
