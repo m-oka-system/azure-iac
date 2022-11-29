@@ -74,3 +74,52 @@ resource "azurerm_app_service_virtual_network_swift_connection" "this" {
   app_service_id = azurerm_linux_web_app.this.id
   subnet_id      = var.webappcontainer_subnet_id
 }
+
+resource "azurerm_log_analytics_workspace" "this" {
+  name                = "${azurerm_linux_web_app.this.name}-logs"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+# az monitor diagnostic-settings categories list --resource {resource_id} --query value[].name -o tsv
+data "azurerm_monitor_diagnostic_categories" "this" {
+  resource_id = azurerm_linux_web_app.this.id
+}
+
+resource "azurerm_monitor_diagnostic_setting" "this" {
+  name                       = "${azurerm_linux_web_app.this.name}-diag-setting"
+  target_resource_id         = azurerm_linux_web_app.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  dynamic "log" {
+    iterator = entry
+    for_each = data.azurerm_monitor_diagnostic_categories.this.logs
+
+    content {
+      category = entry.value #AppServiceHTTPLogs/AppServiceConsoleLogs/AppServiceAppLogs/AppServiceAuditLogs/AppServiceIPSecAuditLogs/AppServicePlatformLogs/AllMetrics
+      enabled  = true
+
+      retention_policy {
+        enabled = true
+        days    = 30
+      }
+    }
+  }
+
+  dynamic "metric" {
+    iterator = entry
+    for_each = data.azurerm_monitor_diagnostic_categories.this.metrics
+
+    content {
+      category = entry.value #AllMetrics
+      enabled  = true
+
+      retention_policy {
+        enabled = true
+        days    = 30
+      }
+    }
+  }
+}
