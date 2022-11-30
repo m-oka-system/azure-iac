@@ -99,7 +99,7 @@ resource "azurerm_cdn_frontdoor_custom_domain_association" "this" {
 }
 
 resource "azurerm_dns_txt_record" "afd_validation" {
-  name                = "_dnsauth.${local.sub_domain_name}"
+  name                = "_dnsauth.${var.custom_domain_host_name}"
   zone_name           = var.dns_zone_name
   resource_group_name = var.resource_group_name
   ttl                 = 3600
