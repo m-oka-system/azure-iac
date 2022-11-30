@@ -6,3 +6,4 @@ variable "web_subnet_id" {}
 variable "appgw_managed_id" {}
 variable "app_selfcert_name" {}
 variable "app_selfcert_versionless_secret_id" {}
+variable "dns_zone_name" {}

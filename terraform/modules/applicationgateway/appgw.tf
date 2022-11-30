@@ -24,6 +24,14 @@ resource "azurerm_public_ip" "this" {
   zones               = ["1", "2", "3"]
 }
 
+resource "azurerm_dns_a_record" "this" {
+  name                = "www"
+  zone_name           = var.dns_zone_name
+  resource_group_name = var.resource_group_name
+  ttl                 = 300
+  target_resource_id  = azurerm_public_ip.this.id
+}
+
 resource "azurerm_application_gateway" "this" {
   name                              = local.application_gateway_name
   resource_group_name               = var.resource_group_name

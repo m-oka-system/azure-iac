@@ -252,3 +252,11 @@ resource "azurerm_subnet_network_security_group_association" "app" {
 #   myip         = chomp(data.http.ipify.response_body)
 #   allowed_cidr = "${local.myip}/32"
 # }
+
+################################
+# Azure DNS
+################################
+resource "azurerm_dns_zone" "public" {
+  name                = var.dns_zone_name
+  resource_group_name = azurerm_resource_group.rg.name
+}

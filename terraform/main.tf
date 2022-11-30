@@ -112,19 +112,7 @@ module "appgw" {
   appgw_managed_id                   = azurerm_user_assigned_identity.appgw.id
   app_selfcert_name                  = azurerm_key_vault_certificate.appgw.name
   app_selfcert_versionless_secret_id = azurerm_key_vault_certificate.appgw.versionless_secret_id
-}
-
-module "dns" {
-  source = "./modules/dns"
-
-  count               = local.create_count
-  prefix              = var.prefix
-  env                 = var.env
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  dns_zone_name       = var.dns_zone_name
-  target_resource_id  = module.appgw[0].appgw_public_ip
-  depends_on          = [module.appgw]
+  dns_zone_name                      = azurerm_dns_zone.public.name
 }
 
 module "vmss" {
