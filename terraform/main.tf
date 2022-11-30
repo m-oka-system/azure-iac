@@ -147,7 +147,6 @@ module "frontdoor" {
   dns_zone_name            = azurerm_dns_zone.public.name
   custom_domain_host_name  = var.custom_domain_host_name
   web_app_default_hostname = module.webappcontainer[0].web_app_default_hostname
-  depends_on               = [module.webappcontainer]
 }
 
 module "webappcontainer" {
@@ -166,6 +165,7 @@ module "webappcontainer" {
   secret_key_base_uri        = azurerm_key_vault_secret.secret_key_base.versionless_id
   docker_image_name          = var.docker_image_name
   docker_image_tag           = var.docker_image_tag
+  frontdoor_id               = module.frontdoor[0].frontdoor_id
   depends_on                 = [module.mysqlfs]
 }
 

@@ -63,6 +63,19 @@ resource "azurerm_linux_web_app" "this" {
       docker_image     = "${azurerm_container_registry.this.login_server}/${var.docker_image_name}"
       docker_image_tag = var.docker_image_tag
     }
+
+    ip_restriction {
+      name        = "AllowFrontDoorAddress"
+      priority    = 100
+      action      = "Allow"
+      service_tag = "AzureFrontDoor.Backend"
+      headers = [{
+        x_azure_fdid      = [var.frontdoor_id] # Input Azure Front Door ID
+        x_fd_health_probe = null
+        x_forwarded_for   = null
+        x_forwarded_host  = null
+      }]
+    }
   }
 
   lifecycle {
