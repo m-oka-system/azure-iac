@@ -144,7 +144,7 @@ resource "azurerm_key_vault_certificate" "appgw" {
         "digitalSignature",
         "keyEncipherment",
       ]
-      subject            = "CN=www.${var.dns_zone_name}"
+      subject            = "CN=${var.custom_domain_host_name}.${var.dns_zone_name}"
       validity_in_months = 12
 
       subject_alternative_names {

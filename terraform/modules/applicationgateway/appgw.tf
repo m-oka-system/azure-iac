@@ -25,7 +25,7 @@ resource "azurerm_public_ip" "this" {
 }
 
 resource "azurerm_dns_a_record" "this" {
-  name                = "www"
+  name                = var.custom_domain_host_name
   zone_name           = var.dns_zone_name
   resource_group_name = var.resource_group_name
   ttl                 = 300

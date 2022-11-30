@@ -75,6 +75,11 @@ variable "dns_zone_name" {
   type = string
 }
 
+variable "custom_domain_host_name" {
+  type    = string
+  default = "www"
+}
+
 variable "docker_image_name" {
   type = string
 }

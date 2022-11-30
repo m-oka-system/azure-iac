@@ -113,6 +113,7 @@ module "appgw" {
   app_selfcert_name                  = azurerm_key_vault_certificate.appgw.name
   app_selfcert_versionless_secret_id = azurerm_key_vault_certificate.appgw.versionless_secret_id
   dns_zone_name                      = azurerm_dns_zone.public.name
+  custom_domain_host_name            = var.custom_domain_host_name
 }
 
 module "vmss" {
