@@ -135,6 +135,21 @@ module "vmss" {
   ]
 }
 
+module "frontdoor" {
+  source = "./modules/frontdoor"
+
+  count                    = local.create_count
+  prefix                   = var.prefix
+  env                      = var.env
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  dns_zone_id              = azurerm_dns_zone.public.id
+  dns_zone_name            = azurerm_dns_zone.public.name
+  custom_domain_host_name  = var.custom_domain_host_name
+  web_app_default_hostname = module.webappcontainer[0].web_app_default_hostname
+  depends_on               = [module.webappcontainer]
+}
+
 module "webappcontainer" {
   source = "./modules/appservice/container"
 
