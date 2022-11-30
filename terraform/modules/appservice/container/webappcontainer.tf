@@ -95,7 +95,7 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
 
   dynamic "log" {
     iterator = entry
-    for_each = data.azurerm_monitor_diagnostic_categories.this.logs
+    for_each = data.azurerm_monitor_diagnostic_categories.this.log_category_types
 
     content {
       category = entry.value #AppServiceHTTPLogs/AppServiceConsoleLogs/AppServiceAppLogs/AppServiceAuditLogs/AppServiceIPSecAuditLogs/AppServicePlatformLogs/AllMetrics

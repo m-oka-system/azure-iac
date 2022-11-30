@@ -22,12 +22,16 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
   overprovision                   = false
   encryption_at_host_enabled      = false
   upgrade_mode                    = "Manual"
-  scale_in_policy                 = "Default"
   secure_boot_enabled             = false
   vtpm_enabled                    = false
   zone_balance                    = true
   zones                           = ["1", "2", "3"]
   custom_data                     = filebase64("${path.module}/userdata.sh")
+
+  scale_in {
+    rule                   = "Default"
+    force_deletion_enabled = false
+  }
 
   admin_ssh_key {
     username   = var.vm_admin_username
