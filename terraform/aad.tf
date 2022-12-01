@@ -78,8 +78,10 @@ resource "azurerm_key_vault" "app" {
     default_action = "Deny"
     ip_rules       = var.allowed_cidr
     virtual_network_subnet_ids = [
-      azurerm_subnet.web.id,
-      azurerm_subnet.app.id,
+      azurerm_subnet.spoke1_web.id,
+      azurerm_subnet.spoke1_app.id,
+      azurerm_subnet.spoke2_web.id,
+      azurerm_subnet.spoke2_app.id,
     ]
   }
 }

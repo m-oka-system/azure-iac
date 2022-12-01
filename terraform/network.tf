@@ -1,6 +1,7 @@
 ################################
 # Virtual network
 ################################
+# Hub
 resource "azurerm_virtual_network" "hub" {
   name                = "${var.prefix}-${var.env}-hub-vnet"
   address_space       = ["10.0.0.0/16"]
@@ -29,6 +30,7 @@ resource "azurerm_subnet" "firewall" {
   address_prefixes     = ["10.0.6.0/24"] # 10.0.6.0 - 10.0.6.255
 }
 
+# Spoke1
 resource "azurerm_virtual_network" "spoke1" {
   name                = "${var.prefix}-${var.env}-spoke1-vnet"
   address_space       = ["10.10.0.0/16"]
@@ -36,7 +38,7 @@ resource "azurerm_virtual_network" "spoke1" {
   resource_group_name = azurerm_resource_group.rg.name
 }
 
-resource "azurerm_subnet" "web" {
+resource "azurerm_subnet" "spoke1_web" {
   name                 = "web"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.spoke1.name
@@ -44,7 +46,7 @@ resource "azurerm_subnet" "web" {
   service_endpoints    = ["Microsoft.KeyVault"]
 }
 
-resource "azurerm_subnet" "app" {
+resource "azurerm_subnet" "spoke1_app" {
   name                 = "app"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.spoke1.name
@@ -63,7 +65,7 @@ resource "azurerm_subnet" "app" {
   }
 }
 
-resource "azurerm_subnet" "db" {
+resource "azurerm_subnet" "spoke1_db" {
   name                 = "db"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.spoke1.name
@@ -79,11 +81,45 @@ resource "azurerm_subnet" "db" {
   }
 }
 
+# Spoke2
+resource "azurerm_virtual_network" "spoke2" {
+  name                = "${var.prefix}-${var.env}-spoke2-vnet"
+  address_space       = ["10.20.0.0/16"]
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_subnet" "spoke2_web" {
+  name                 = "web"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.spoke2.name
+  address_prefixes     = ["10.20.1.0/24"]
+  service_endpoints    = ["Microsoft.KeyVault"]
+}
+
+resource "azurerm_subnet" "spoke2_app" {
+  name                 = "app"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.spoke2.name
+  address_prefixes     = ["10.20.2.0/24"]
+  service_endpoints = [
+    "Microsoft.KeyVault",
+    "Microsoft.Storage",
+  ]
+}
+
+resource "azurerm_subnet" "spoke2_db" {
+  name                 = "db"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.spoke2.name
+  address_prefixes     = ["10.20.3.0/24"]
+}
+
 ################################
 # Vnet peering
 ################################
-resource "azurerm_virtual_network_peering" "to_spoke1" {
-  name                         = "toSpoke1"
+resource "azurerm_virtual_network_peering" "hub_to_spoke1" {
+  name                         = "Hub-to-Spoke1"
   resource_group_name          = azurerm_resource_group.rg.name
   virtual_network_name         = azurerm_virtual_network.hub.name
   remote_virtual_network_id    = azurerm_virtual_network.spoke1.id
@@ -93,10 +129,32 @@ resource "azurerm_virtual_network_peering" "to_spoke1" {
   use_remote_gateways          = false
 }
 
-resource "azurerm_virtual_network_peering" "to_hub" {
-  name                         = "toHub"
+resource "azurerm_virtual_network_peering" "spoke1_to_hub" {
+  name                         = "Spoke1-to-Hub"
   resource_group_name          = azurerm_resource_group.rg.name
   virtual_network_name         = azurerm_virtual_network.spoke1.name
+  remote_virtual_network_id    = azurerm_virtual_network.hub.id
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+}
+
+resource "azurerm_virtual_network_peering" "hub_to_spoke2" {
+  name                         = "Hub-to-Spoke2"
+  resource_group_name          = azurerm_resource_group.rg.name
+  virtual_network_name         = azurerm_virtual_network.hub.name
+  remote_virtual_network_id    = azurerm_virtual_network.spoke2.id
+  allow_forwarded_traffic      = true
+  allow_virtual_network_access = true
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+}
+
+resource "azurerm_virtual_network_peering" "spoke2_to_hub" {
+  name                         = "Spoke2-to-Hub"
+  resource_group_name          = azurerm_resource_group.rg.name
+  virtual_network_name         = azurerm_virtual_network.spoke2.name
   remote_virtual_network_id    = azurerm_virtual_network.hub.id
   allow_forwarded_traffic      = true
   allow_virtual_network_access = true
@@ -156,8 +214,13 @@ resource "azurerm_network_security_rule" "in_https_from_all" {
   network_security_group_name = azurerm_network_security_group.web.name
 }
 
-resource "azurerm_subnet_network_security_group_association" "web" {
-  subnet_id                 = azurerm_subnet.web.id
+resource "azurerm_subnet_network_security_group_association" "spoke1_web" {
+  subnet_id                 = azurerm_subnet.spoke1_web.id
+  network_security_group_id = azurerm_network_security_group.web.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "spoke2_web" {
+  subnet_id                 = azurerm_subnet.spoke2_web.id
   network_security_group_id = azurerm_network_security_group.web.id
 }
 
@@ -238,8 +301,13 @@ resource "azurerm_network_security_rule" "in_rails_from_myip" {
   network_security_group_name = azurerm_network_security_group.app.name
 }
 
-resource "azurerm_subnet_network_security_group_association" "app" {
-  subnet_id                 = azurerm_subnet.app.id
+resource "azurerm_subnet_network_security_group_association" "spoke1_app" {
+  subnet_id                 = azurerm_subnet.spoke1_app.id
+  network_security_group_id = azurerm_network_security_group.app.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "spoke2_app" {
+  subnet_id                 = azurerm_subnet.spoke2_app.id
   network_security_group_id = azurerm_network_security_group.app.id
 }
 

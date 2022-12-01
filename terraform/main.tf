@@ -31,7 +31,7 @@ module "windows_vm" {
   env                 = var.env
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  app_subnet_id       = azurerm_subnet.app.id
+  app_subnet_id       = azurerm_subnet.spoke2_app.id
   vm_size             = var.vm_size
   vm_admin_username   = var.vm_admin_username
   vm_admin_password   = var.vm_admin_password
@@ -48,7 +48,7 @@ module "linux_vm" {
   env                 = var.env
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  app_subnet_id       = azurerm_subnet.app.id
+  app_subnet_id       = azurerm_subnet.spoke2_app.id
   vm_size             = "Standard_DS1_v2"
   vm_admin_username   = var.vm_admin_username
   app_managed_id      = azurerm_user_assigned_identity.app.id
@@ -108,7 +108,7 @@ module "appgw" {
   env                                = var.env
   resource_group_name                = azurerm_resource_group.rg.name
   location                           = azurerm_resource_group.rg.location
-  web_subnet_id                      = azurerm_subnet.web.id
+  web_subnet_id                      = azurerm_subnet.spoke1_web.id
   appgw_managed_id                   = azurerm_user_assigned_identity.appgw.id
   app_selfcert_name                  = azurerm_key_vault_certificate.appgw.name
   app_selfcert_versionless_secret_id = azurerm_key_vault_certificate.appgw.versionless_secret_id
@@ -124,7 +124,7 @@ module "vmss" {
   env                     = var.env
   resource_group_name     = azurerm_resource_group.rg.name
   location                = azurerm_resource_group.rg.location
-  app_subnet_id           = azurerm_subnet.app.id
+  app_subnet_id           = azurerm_subnet.spoke2_app.id
   vm_size                 = "Standard_DS1_v2"
   vm_admin_username       = var.vm_admin_username
   app_managed_id          = azurerm_user_assigned_identity.app.id
@@ -160,7 +160,7 @@ module "webappcontainer" {
   random                     = random_integer.num.result
   webappcontainer_managed_id = azurerm_user_assigned_identity.webappcontainer.id
   webappcontainer_client_id  = azurerm_user_assigned_identity.webappcontainer.client_id
-  webappcontainer_subnet_id  = azurerm_subnet.app.id
+  webappcontainer_subnet_id  = azurerm_subnet.spoke1_app.id
   app_keyvault_name          = azurerm_key_vault.app.name
   secret_key_base_uri        = azurerm_key_vault_secret.secret_key_base.versionless_id
   docker_image_name          = var.docker_image_name
@@ -177,7 +177,7 @@ module "mysqlfs" {
   env                 = var.env
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  db_subnet_id        = azurerm_subnet.db.id
+  db_subnet_id        = azurerm_subnet.spoke1_db.id
   db_name             = var.db_name
   db_username         = var.db_username
   db_password         = var.db_password
