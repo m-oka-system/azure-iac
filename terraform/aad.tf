@@ -151,7 +151,7 @@ resource "azurerm_key_vault_certificate" "appgw" {
 
       subject_alternative_names {
         dns_names = [
-          "${var.dns_zone_name}",
+          var.dns_zone_name,
         ]
       }
     }
