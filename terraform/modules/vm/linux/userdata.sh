@@ -31,33 +31,33 @@ echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 sudo docker pull ${IMAGE}:${TAG}
 
 # Application Environment Variables
-RDS_HOST_NAME=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault --name MYSQL-HOST --query value -o tsv)
-MYSQL_ROOT_USER=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault --name MYSQL-USERNAME --query value -o tsv)
-MYSQL_ROOT_PASSWORD=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault --name MYSQL-PASSWORD --query value -o tsv)
+DB_HOST=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault --name DB-HOST --query value -o tsv)
+DB_USERNAME=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault --name DB-USERNAME --query value -o tsv)
+DB_PASSWORD=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault --name DB-PASSWORD --query value -o tsv)
 SECRET_KEY_BASE=$(az keyvault secret show --vault-name ${PROJECT}-${ENV}-vault --name SECRET-KEY-BASE --query value -o tsv)
 
 # Create database and migrate
 sudo docker run -p 3000:3000 -e RAILS_ENV="production" \
   -e SECRET_KEY_BASE=$SECRET_KEY_BASE \
-  -e RDS_HOST_NAME=$RDS_HOST_NAME \
-  -e MYSQL_ROOT_USER=$MYSQL_ROOT_USER \
-  -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+  -e DB_HOST=$DB_HOST \
+  -e DB_USERNAME=$DB_USERNAME \
+  -e DB_PASSWORD=$DB_PASSWORD \
   ${IMAGE}:${TAG} rails db:create db:migrate db:seed
 
 # Running application
 sudo docker run -p 3000:3000 -e RAILS_ENV="production" \
   -e RAILS_SERVE_STATIC_FILES=1 \
   -e SECRET_KEY_BASE=$SECRET_KEY_BASE \
-  -e RDS_HOST_NAME=$RDS_HOST_NAME \
-  -e MYSQL_ROOT_USER=$MYSQL_ROOT_USER \
-  -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+  -e DB_HOST=$DB_HOST \
+  -e DB_USERNAME=$DB_USERNAME \
+  -e DB_PASSWORD=$DB_PASSWORD \
   ${IMAGE}:${TAG} rails s -b 0.0.0.0
 
 # # Delete database
 # sudo docker run -p 3000:3000 -e RAILS_ENV="production" \
 #   -e DISABLE_DATABASE_ENVIRONMENT_CHECK=1 \
 #   -e SECRET_KEY_BASE=$SECRET_KEY_BASE \
-#   -e RDS_HOST_NAME=$RDS_HOST_NAME \
-#   -e MYSQL_ROOT_USER=$MYSQL_ROOT_USER \
-#   -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+#   -e DB_HOST=$DB_HOST \
+#   -e DB_USERNAME=$DB_USERNAME \
+#   -e DB_PASSWORD=$DB_PASSWORD \
 #   ${IMAGE}:${TAG} rails db:drop
