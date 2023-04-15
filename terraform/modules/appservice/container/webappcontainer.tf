@@ -22,11 +22,12 @@ resource "azurerm_service_plan" "this" {
 }
 
 resource "azurerm_linux_web_app" "this" {
-  name                = "${var.prefix}-${var.env}-app-${var.random}"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  service_plan_id     = azurerm_service_plan.this.id
-  https_only          = true
+  name                      = "${var.prefix}-${var.env}-app-${var.random}"
+  resource_group_name       = var.resource_group_name
+  location                  = var.location
+  service_plan_id           = azurerm_service_plan.this.id
+  virtual_network_subnet_id = var.webappcontainer_subnet_id
+  https_only                = true
 
   app_settings = {
     "DOCKER_REGISTRY_SERVER_URL"          = "https://${local.container_registry_name}.azurecr.io"
@@ -81,11 +82,6 @@ resource "azurerm_linux_web_app" "this" {
   lifecycle {
     ignore_changes = [site_config[0].application_stack[0].docker_image_tag]
   }
-}
-
-resource "azurerm_app_service_virtual_network_swift_connection" "this" {
-  app_service_id = azurerm_linux_web_app.this.id
-  subnet_id      = var.webappcontainer_subnet_id
 }
 
 resource "azurerm_log_analytics_workspace" "this" {
